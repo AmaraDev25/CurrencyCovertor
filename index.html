@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-compatible" content="IE-edge"/>
+<meta name="viewport" content="width=device-width ,initial-scale=1.0"/>
+<title>Currency Converter</title>
+<style type="text/css">
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+*{
+padding:0;
+margin:0;
+z-index:9;
+box-sizing:border-box;
+transition:all .5s .2s linear;
+font-family:'Poppins',sans-serif;
+}
+body{
+background:#fe6145;
+display:flex;
+flex-direction:column;
+min-height:100vh;
+justify-content:center;
+align-items:center;
+}
+.wrapper{
+background:#eee;
+padding:20px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+gap:20px;
+box-shadow:0 2px 23px #e74c39;
+}
+.wrapper :where(h2, p){
+align-self:flex-start;
+}
+.wrapper p.creating{
+font-family:cursive;
+font-size:26px;
+font-weight:300;
+}
+.wrapper :where(input, button){
+border:solid 1px;
+outline:none;
+background:none;
+width:100%;
+height:48px;
+font-size:17px;
+text-align:center;
+}
+.wrapper button:hover{
+background:#fe6145;
+color:#eee;
+}
+.wrapper .exchanging{
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:10px;
+gap:14%;
+}
+.wrapper .exchanging select{
+min-width:47px;
+height:30px;
+}
+.wrapper .exchanging .reverse{
+font-size:23px;
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<h2>Currency Converter</h2>
+<p class="creating">This tool created using vanilla javascript !</p>
+<input type="text" class="amount-input" placeholder="Enter an amount here" autofocus>
+<div class="exchanging">
+<div class="from">
+<h3>From</h3>
+<select>
+</select>
+</div>
+<p class="reverse">🔁</p>
+<div class="to">
+<h3>To</h3>
+<select>
+</select>
+</div>
+</div>
+<h3>Exchange rate</h3>
+<p class="exchange-rate"></p>
+<button class="exchange-btn">Get exchange rate</button>
+</div>
+<script type="text/javascript">
+var amountInput=document.querySelector('.amount-input'),
+exchangeBtn=document.querySelector('.exchange-btn'),
+exchangeRateText=document.querySelector('.exchange-rate'),
+fromSelect=document.querySelector('.from select'),
+toSelect=document.querySelector('.to select'),
+selects=document.querySelectorAll('select'),
+reverseSelectsBtn=document.querySelector('.reverse');
+
+let countryCode = {
+"AED" : "AE",
+"AFN" : "AF",
+"XCD" : "AG",
+"ALL" : "AL",
+"AMD" : "AM",
+"ANG" : "AN",
+"AOA" : "AO",
+"AQD" : "AQ",
+"ARS" : "AR",
+"AUD" : "AU",
+"AZN" : "AZ",
+"BAM" : "BA",
+"BBD" : "BB",
+"BDT" : "BD",
+"XOF" : "BE",
+"BGN" : "BG",
+"BHD" : "BH",
+"BIF" : "BI",
+"BMD" : "BM",
+"BND" : "BN",
+"BOB" : "BO",
+"BRL" : "BR",
+"BSD" : "BS",
+"NOK" : "BV",
+"BWP" : "BW",
+"BYR" : "BY",
+"BZD" : "BZ",
+"CAD" : "CA",
+"CDF" : "CD",
+"XAF" : "CF",
+"CHF" : "CH",
+"CLP" : "CL",
+"CNY" : "CN",
+"COP" : "CO",
+"CRC" : "CR",
+"CUP" : "CU",
+"CVE" : "CV",
+"CYP" : "CY",
+"CZK" : "CZ",
+"DJF" : "DJ",
+"DKK" : "DK",
+"DOP" : "DO",
+"DZD" : "DZ",
+"ECS" : "EC",
+"EEK" : "EE",
+"EGP" : "EG",
+"ETB" : "ET",
+"EUR" : "FR",
+"FJD" : "FJ",
+"FKP" : "FK",
+"GBP" : "GB",
+"GEL" : "GE",
+"GGP" : "GG",
+"GHS" : "GH",
+"GIP" : "GI",
+"GMD" : "GM",
+"GNF" : "GN",
+"GTQ" : "GT",
+"GYD" : "GY",
+"HKD" : "HK",
+"HNL" : "HN",
+"HRK" : "HR",
+"HTG" : "HT",
+"HUF" : "HU",
+"IDR" : "ID",
+"ILS" : "IL",
+"INR" : "IN",
+"IQD" : "IQ",
+"IRR" : "IR",
+"ISK" : "IS",
+"JMD" : "JM",
+"JOD" : "JO",
+"JPY" : "JP",
+"KES" : "KE",
+"KGS" : "KG",
+"KHR" : "KH",
+"KMF" : "KM",
+"KPW" : "KP",
+"KRW" : "KR",
+"KWD" : "KW",
+"KYD" : "KY",
+"KZT" : "KZ",
+"LAK" : "LA",
+"LBP" : "LB",
+"LKR" : "LK",
+"LRD" : "LR",
+"LSL" : "LS",
+"LTL" : "LT",
+"LVL" : "LV",
+"LYD" : "LY",
+"MAD" : "MA",
+"MDL" : "MD",
+"MGA" : "MG",
+"MKD" : "MK",
+"MMK" : "MM",
+"MNT" : "MN",
+"MOP" : "MO",
+"MRO" : "MR",
+"MTL" : "MT",
+"MUR" : "MU",
+"MVR" : "MV",
+"MWK" : "MW",
+"MXN" : "MX",
+"MYR" : "MY",
+"MZN" : "MZ",
+"NAD" : "NA",
+"XPF" : "NC",
+"NGN" : "NG",
+"NIO" : "NI",
+"NPR" : "NP",
+"NZD" : "NZ",
+"OMR" : "OM",
+"PAB" : "PA",
+"PEN" : "PE",
+"PGK" : "PG",
+"PHP" : "PH",
+"PKR" : "PK",
+"PLN" : "PL",
+"PYG" : "PY",
+"QAR" : "QA",
+"RON" : "RO",
+"RSD" : "RS",
+"RUB" : "RU",
+"RWF" : "RW",
+"SAR" : "SA",
+"SBD" : "SB",
+"SCR" : "SC",
+"SDG" : "SD",
+"SEK" : "SE",
+"SGD" : "SG",
+"SKK" : "SK",
+"SLL" : "SL",
+"SOS" : "SO",
+"SRD" : "SR",
+"STD" : "ST",
+"SVC" : "SV",
+"SYP" : "SY",
+"SZL" : "SZ",
+"THB" : "TH",
+"TJS" : "TJ",
+"TMT" : "TM",
+"TND" : "TN",
+"TOP" : "TO",
+"TRY" : "TR",
+"TTD" : "TT",
+"TWD" : "TW",
+"TZS" : "TZ",
+"UAH" : "UA",
+"UGX" : "UG",
+"USD" : "US",
+"UYU" : "UY",
+"UZS" : "UZ",
+"VEF" : "VE",
+"VND" : "VN",
+"VUV" : "VU",
+"YER" : "YE",
+"ZAR" : "ZA",
+"ZMK" : "ZM",
+"ZWD" : "ZW"
+}
+for(var i=0;i<selects.length;i++){
+for(currencyCode in countryCode){
+let selected;
+if(i==0){
+selected = currencyCode== 'USD'? 'selected':'';
+}
+if(i==1){
+selected = currencyCode== 'DZD'? 'selected':'';
+}
+let optionTag=`<option value="${currencyCode}" ${selected}>${currencyCode}</option>`;
+selects[i].insertAdjacentHTML('beforeend', optionTag)
+}
+}
+exchangeBtn.onclick=()=>{
+getExchangeRate()
+};
+reverseSelectsBtn.onclick=()=>{
+tempCode=fromSelect.value;
+fromSelect.value=toSelect.value;
+toSelect.value=tempCode;
+getExchangeRate()
+};
+
+
+function getExchangeRate(){
+let amountVal = amountInput.value;
+if(amountVal == "" || amountVal == "0"){
+    amount.value = "1";
+    amountVal = 1;
+}
+exchangeRateText.innerText = "Getting exchange rate...";
+let url = `https://v6.exchangerate-api.com/v6/afb66c89c1e53f44e6cc0953/latest/${fromSelect.value}`;
+fetch(url).then(response => response.json()).then(result =>{
+    let exchangeRate = result.conversion_rates[toSelect.value];
+    let totalExRate = (amountVal * exchangeRate).toFixed(2);
+    exchangeRateText.innerText = `${amountVal} ${fromSelect.value} = ${totalExRate} ${toSelect.value}`;
+}).catch(() =>{
+    exchangeRateText.innerText = "Something went wrong";
+});
+p
+}
+</script>
+</body>
+</html>
